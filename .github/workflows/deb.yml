@@ -3,62 +3,62 @@ name: Helm chart release and update index
 on:
   push:
     branches:
-      -  test
+      - test
 
 jobs:
 
- build:
-    runs-on: ubuntu-latest
-    
+  build:
+   strategy:
+        matrix:
+          version: ['v5.x']
+          kernel-version: ['5.15.105']
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-       fetch-depth: 0
+   runs-on: ubuntu-latest
 
+   steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
 
-    - name: Install necessary  package
-      run : |
-        sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
- 
-    
-    - name : Get kernel source
-      run: |
-          wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.15.105.tar.xz
+        - name: Install necessary  package
+          run: |
+                sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
 
-    - name: Extract kernel source
-      run: |
-            tar -xf linux-5.15.105.tar.xz
-            
+        - name: Get kernel source
+          run: |
+                wget https://mirrors.edge.kernel.org/pub/linux/kernel/${{matrix.version}}/linux-${{matrix.kernel-version}}.tar.xz
 
-    - name: Make configuration ARCH
-      working-directory: ${{ github.workspace }}
-      run: |
-         cd linux-5.15.105/ 
-         ls -l
-         make ARCH=i386 defconfig 
-    
+        - name: Extract kernel source
+          run: |
+                tar -xf linux-${{matrix.kernel-version}}.tar.xz
 
-    - name: Change var configuration 
-      working-directory: linux-5.15.105
-      run: |
-        sed -i 's/CONFIG_SYSTEM_TRUSTED_KEYS = ""/CONFIG_SYSTEM_TRUSTED_KEYS=""/' .config
+        - name: Make configuration ARCH
+          working-directory: ${{ github.workspace }}
+          run: |
+                cd linux-${{matrix.kernel-version}}/ 
+                ls -l
+                make ARCH=i386 defconfig
 
-    - name: Make kernel and create .deb files
-      working-directory: linux-5.15.105
-      run: |
-        nice make -j$(nproc) bindeb-pkg
-        cd ..
-        ls -l
-        mkdir deb_archive
-        mv  *.deb deb_archive/
-        tar -czvf kernel_deb_files.tar.gz deb_archive/
+        - name: Change var configuration
+          working-directory: linux-${{matrix.kernel-version}}
+          run: |
+                sed -i 's/CONFIG_SYSTEM_TRUSTED_KEYS = ""/CONFIG_SYSTEM_TRUSTED_KEYS=""/' .config
 
+        - name: Make kernel and create .deb files
+          working-directory: linux-${{matrix.kernel-version}}
+          run: |
+                nice make -j$(nproc) bindeb-pkg
+                cd ..
+                ls -l
+                mkdir deb_archive
+                mv  *.deb deb_archive/
+                tar -czvf kernel_deb_files.tar.gz deb_archive/
 
-    - name: Archive .deb files
-      uses: actions/upload-artifact@v2
-      with:
-            name: kernel-deb-files
-            path: kernel_deb_files.tar.gz
-      
+        - name: Archive .deb files
+          uses: actions/upload-artifact@v2
+          with:
+                name: kernel-deb-files
+                path: kernel_deb_files.tar.gz
+
+     
