@@ -52,7 +52,7 @@ jobs:
         cd ..
         ls -l
         mkdir deb_archive
-        mv ../*.deb deb_archive/
+        mv  *.deb deb_archive/
         tar -czvf kernel_deb_files.tar.gz deb_archive/
 
 
