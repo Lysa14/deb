@@ -1,4 +1,4 @@
-name: Helm chart release and update index
+name: Build kernel and create .deb files
 
 on:
   push:
