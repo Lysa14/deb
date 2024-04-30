@@ -3,7 +3,7 @@ name: Build kernel and create .deb files
 on:
   push:
     branches:
-      - test
+      - test-commit
 
 jobs:
 
