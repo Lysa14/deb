@@ -23,7 +23,8 @@ jobs:
         run: |
           sudo apt-get install -y git
           git clone https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy
-          git checkout 28529530a96faaebe46d311636d45fdc9b9de164
+          git branch -a
+          git checkout e72e5ce78b3e7909f68796e16f9daa7f5045d5fd
           cd jammy/
 
       - name: Make configuration ARCH
