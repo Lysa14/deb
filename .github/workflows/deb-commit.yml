@@ -6,51 +6,48 @@ on:
       - test-commit
 
 jobs:
-
   build:
+    runs-on: ubuntu-latest
 
-   runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-   steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
+      - name: Install necessary  package
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
 
-        - name: Install necessary  package
-          run: |
-              sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
-                
-        - name: Get kernel source
-          run: |
-              sudo apt-get install -y git
-              git clone https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy
-              git checkout 28529530a96faaebe46d311636d45fdc9b9de164
-              cd jammy/
+      - name: Get kernel source
+        run: |
+          sudo apt-get install -y git
+          git clone https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy
+          git checkout 28529530a96faaebe46d311636d45fdc9b9de164
+          cd jammy/
 
+      - name: Make configuration ARCH
+        working-directory: ${{ github.workspace }}
+        run: |
+          make ARCH=i386 defconfig
 
-        - name: Make configuration ARCH
-          working-directory: ${{ github.workspace }}
-          run: |
-                make ARCH=i386 defconfig
+      - name: Change var configuration
+        working-directory: jammy
+        run: |
+          sed -i 's/CONFIG_SYSTEM_TRUSTED_KEYS = ""/CONFIG_SYSTEM_TRUSTED_KEYS=""/' .config
 
-        - name: Change var configuration
-          working-directory: jammy
-          run: |
-                sed -i 's/CONFIG_SYSTEM_TRUSTED_KEYS = ""/CONFIG_SYSTEM_TRUSTED_KEYS=""/' .config
+      - name: Make kernel and create .deb files
+        working-directory: jammy
+        run: |
+          	make deb-pkg -j2 BUILD_TOOLS=y
+             cd ..
+             ls -l
+             mkdir deb_archive
+             mv  *.deb deb_archive/
+             tar -czvf kernel_deb_files.tar.gz deb_archive/
 
-        - name: Make kernel and create .deb files
-          working-directory: jammy
-          run: |
-             	make deb-pkg -j2 BUILD_TOOLS=y
-                cd ..
-                ls -l
-                mkdir deb_archive
-                mv  *.deb deb_archive/
-                tar -czvf kernel_deb_files.tar.gz deb_archive/
-
-        - name: Archive .deb files
-          uses: actions/upload-artifact@v2
-          with:
-                name: kernel-deb-files
-                path: kernel_deb_files.tar.gz
+      - name: Archive .deb files
+        uses: actions/upload-artifact@v2
+        with:
+          name: kernel-deb-files
+          path: kernel_deb_files.tar.gz
