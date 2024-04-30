@@ -39,12 +39,12 @@ jobs:
       - name: Make kernel and create .deb files
         working-directory: jammy
         run: |
-          	make deb-pkg -j2 BUILD_TOOLS=y
-             cd ..
-             ls -l
-             mkdir deb_archive
-             mv  *.deb deb_archive/
-             tar -czvf kernel_deb_files.tar.gz deb_archive/
+                make deb-pkg -j2 BUILD_TOOLS=y
+                cd ..
+                ls -l
+                mkdir deb_archive
+                mv  *.deb deb_archive/
+                tar -czvf kernel_deb_files.tar.gz deb_archive/
 
       - name: Archive .deb files
         uses: actions/upload-artifact@v2
