@@ -1,4 +1,4 @@
-name: Build kernel and create .deb files
+name: Build kernel with commit and create .deb files
 
 on:
   push:
@@ -21,6 +21,12 @@ jobs:
           run: |
                 sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
 
+
+
+        - name: Set up Git
+          run: |
+                git config --global user.name "${{ github.actor }}"
+                           
         - name: Get kernel source
           run: |
             	git clone https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy
