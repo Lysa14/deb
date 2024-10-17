@@ -3,7 +3,7 @@ name: Build kernel and create .deb files
 on:
   push:
     branches:
-      - test
+      - main
 
 jobs:
 
@@ -21,7 +21,7 @@ jobs:
           with:
             fetch-depth: 0
 
-        - name: Install necessary packages
+        - name: Install necessary package
           run: |
                 sudo apt-get update && sudo apt-get install -y build-essential fakeroot bc python3 bison flex libelf-dev libssl-dev libncurses-dev dwarves lz4 devscripts dkms vim make wget
 
